@@ -24,6 +24,9 @@ Cant transmogrify rediculus items // Foereaper: would be fun to stab people with
 #define sT  sTransmogrification
 #define GTS session->GetTrinityString // dropped translation support, no one using?
 
+#include "ToUTF8.h"
+
+
 class CS_Transmogrification : public CreatureScript
 {
 public:
@@ -33,7 +36,7 @@ public:
     {
         WorldSession* session = player->GetSession();
         if (sT->GetEnableTransmogInfo())
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Misc_Book_11:30:30:-18:0|tHow transmogrification works", EQUIPMENT_SLOT_END+9, 0);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/ICONS/INV_Misc_Book_11:30:30:-18:0|t如何进行幻化"), EQUIPMENT_SLOT_END+9, 0);
         for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
         {
             if (const char* slotName = sT->GetSlotName(slot, session))
@@ -41,15 +44,15 @@ public:
                 Item* newItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
                 uint32 entry = newItem ? sT->GetFakeEntry(newItem->GetGUID()) : 0;
                 std::string icon = entry ? sT->GetItemIcon(entry,30,30,-18,0) : sT->GetSlotIcon(slot, 30, 30, -18, 0);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, icon+std::string(slotName), EQUIPMENT_SLOT_END, slot);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, icon+string_To_UTF8(std::string(slotName)), EQUIPMENT_SLOT_END, slot);
             }
         }
 #ifdef PRESETS
         if (sT->GetEnableSets())
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG,"|TInterface/RAIDFRAME/UI-RAIDFRAME-MAINASSIST:30:30:-18:0|tManage sets", EQUIPMENT_SLOT_END+4, 0);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG,string_To_UTF8("|TInterface/RAIDFRAME/UI-RAIDFRAME-MAINASSIST:30:30:-18:0|t管理配置"), EQUIPMENT_SLOT_END+4, 0);
 #endif
-        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Enchant_Disenchant:30:30:-18:0|tRemove all transmogrifications", EQUIPMENT_SLOT_END+2, 0, "Remove transmogrifications from all equipped items?", 0, false);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|tUpdate menu", EQUIPMENT_SLOT_END+1, 0);
+        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/ICONS/INV_Enchant_Disenchant:30:30:-18:0|t移除所有幻化效果"), EQUIPMENT_SLOT_END+2, 0, string_To_UTF8("要移除幻化？"), 0, false);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|t刷新菜单"), EQUIPMENT_SLOT_END+1, 0);
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         return true;
     }
@@ -112,13 +115,13 @@ public:
                     return true;
                 }
                 if (sT->GetEnableSetInfo())
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Misc_Book_11:30:30:-18:0|tHow sets work", EQUIPMENT_SLOT_END+10, 0);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/ICONS/INV_Misc_Book_11:30:30:-18:0|t如何进行配置"), EQUIPMENT_SLOT_END+10, 0);
                 for (Transmogrification::presetIdMap::const_iterator it = sT->presetByName[player->GetGUID()].begin(); it != sT->presetByName[player->GetGUID()].end(); ++it)
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Misc_Statue_02:30:30:-18:0|t"+it->second, EQUIPMENT_SLOT_END+6, it->first);
 
                 if (sT->presetByName[player->GetGUID()].size() < sT->GetMaxSets())
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/GuildBankFrame/UI-GuildBankFrame-NewTab:30:30:-18:0|tSave set", EQUIPMENT_SLOT_END+8, 0);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END+1, 0);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/GuildBankFrame/UI-GuildBankFrame-NewTab:30:30:-18:0|t保存配置"), EQUIPMENT_SLOT_END+8, 0);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/ICONS/Ability_Spy:30:30:-18:0|t返回.."), EQUIPMENT_SLOT_END+1, 0);
                 player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
             } break;
         case EQUIPMENT_SLOT_END+5: // Use preset
@@ -147,9 +150,9 @@ public:
                 for (Transmogrification::slotMap::const_iterator it = sT->presetById[player->GetGUID()][action].begin(); it != sT->presetById[player->GetGUID()][action].end(); ++it)
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, sT->GetItemIcon(it->second, 30, 30, -18, 0)+sT->GetItemLink(it->second, session), sender, action);
 
-                player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Misc_Statue_02:30:30:-18:0|tUse set", EQUIPMENT_SLOT_END+5, action, "Using this set for transmogrify will bind transmogrified items to you and make them non-refundable and non-tradeable.\nDo you wish to continue?\n\n"+sT->presetByName[player->GetGUID()][action], 0, false);
-                player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/PaperDollInfoFrame/UI-GearManager-LeaveItem-Opaque:30:30:-18:0|tDelete set", EQUIPMENT_SLOT_END+7, action, "Are you sure you want to delete "+sT->presetByName[player->GetGUID()][action]+"?", 0, false);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END+4, 0);
+                player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/ICONS/INV_Misc_Statue_02:30:30:-18:0|t使用配置"), EQUIPMENT_SLOT_END+5, action, string_To_UTF8("使用此配置进行幻化会将物品绑定而无法退还和交易。\n确认要继续？\n\n")+sT->presetByName[player->GetGUID()][action], 0, false);
+                player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/PaperDollInfoFrame/UI-GearManager-LeaveItem-Opaque:30:30:-18:0|t删除配置"), EQUIPMENT_SLOT_END+7, action, string_To_UTF8("确认要删除？")+sT->presetByName[player->GetGUID()][action]+"?", 0, false);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/ICONS/Ability_Spy:30:30:-18:0|t返回.."), EQUIPMENT_SLOT_END+4, 0);
                 player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
             } break;
         case EQUIPMENT_SLOT_END+7: // Delete preset
@@ -196,20 +199,20 @@ public:
                     }
                 }
                 if (canSave)
-                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/GuildBankFrame/UI-GuildBankFrame-NewTab:30:30:-18:0|tSave set", 0, 0, "Insert set name", cost*sT->GetSetCostModifier()+sT->GetSetCopperCost(), true);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|tUpdate menu", sender, action);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END+4, 0);
+                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/GuildBankFrame/UI-GuildBankFrame-NewTab:30:30:-18:0|t保存配置"), 0, 0, string_To_UTF8("输入配置名称"), cost*sT->GetSetCostModifier()+sT->GetSetCopperCost(), true);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|t刷新菜单"), sender, action);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/ICONS/Ability_Spy:30:30:-18:0|t返回.."), EQUIPMENT_SLOT_END+4, 0);
                 player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
             } break;
         case EQUIPMENT_SLOT_END+10: // Set info
             {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END+4, 0);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/ICONS/Ability_Spy:30:30:-18:0|t返回.."), EQUIPMENT_SLOT_END+4, 0);
                 player->SEND_GOSSIP_MENU(sT->GetSetNpcText(), creature->GetGUID());
             } break;
 #endif
         case EQUIPMENT_SLOT_END+9: // Transmog info
             {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END+1, 0);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/ICONS/Ability_Spy:30:30:-18:0|t返回.."), EQUIPMENT_SLOT_END+1, 0);
                 player->SEND_GOSSIP_MENU(sT->GetTransmogNpcText(), creature->GetGUID());
             } break;
         default: // Transmogrify
@@ -330,7 +333,7 @@ public:
                 if (sT->GetFakeEntry(oldItem->GetGUID()) == newItem->GetEntry())
                     continue;
                 ++limit;
-                player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, sT->GetItemIcon(newItem->GetEntry(), 30, 30, -18, 0)+sT->GetItemLink(newItem, session), slot, newItem->GetGUIDLow(), "Using this item for transmogrify will bind it to you and make it non-refundable and non-tradeable.\nDo you wish to continue?\n\n"+sT->GetItemIcon(newItem->GetEntry(), 40, 40, -15, -10)+sT->GetItemLink(newItem, session)+ss.str(), price, false);
+                player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, sT->GetItemIcon(newItem->GetEntry(), 30, 30, -18, 0)+sT->GetItemLink(newItem, session), slot, newItem->GetGUIDLow(), string_To_UTF8("使用此物品进行幻化会将物品绑定而无法退还和交易。\n确认要继续？\n\n")+sT->GetItemIcon(newItem->GetEntry(), 40, 40, -15, -10)+sT->GetItemLink(newItem, session)+ss.str(), price, false);
             }
 
             for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
@@ -350,14 +353,14 @@ public:
                     if (sT->GetFakeEntry(oldItem->GetGUID()) == newItem->GetEntry())
                         continue;
                     ++limit;
-                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, sT->GetItemIcon(newItem->GetEntry(), 30, 30, -18, 0)+sT->GetItemLink(newItem, session), slot, newItem->GetGUIDLow(), "Using this item for transmogrify will bind it to you and make it non-refundable and non-tradeable.\nDo you wish to continue?\n\n"+sT->GetItemIcon(newItem->GetEntry(), 40, 40, -15, -10)+sT->GetItemLink(newItem, session)+ss.str(), price, false);
+                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, sT->GetItemIcon(newItem->GetEntry(), 30, 30, -18, 0)+sT->GetItemLink(newItem, session), slot, newItem->GetGUIDLow(), string_To_UTF8("使用此物品进行幻化会将物品绑定而无法退还和交易。\n确认要继续？\n\n")+sT->GetItemIcon(newItem->GetEntry(), 40, 40, -15, -10)+sT->GetItemLink(newItem, session)+ss.str(), price, false);
                 }
             }
         }
 
-        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Enchant_Disenchant:30:30:-18:0|tRemove transmogrification", EQUIPMENT_SLOT_END+3, slot, "Remove transmogrification from the slot?", 0, false);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|tUpdate menu", EQUIPMENT_SLOT_END, slot);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END+1, 0);
+        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/ICONS/INV_Enchant_Disenchant:30:30:-18:0|t移除幻化"), EQUIPMENT_SLOT_END+3, slot, string_To_UTF8("要从此位置移除幻化？"), 0, false);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|t刷新菜单"), EQUIPMENT_SLOT_END, slot);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, string_To_UTF8("|TInterface/ICONS/Ability_Spy:30:30:-18:0|t返回.."), EQUIPMENT_SLOT_END+1, 0);
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
     }
 };
