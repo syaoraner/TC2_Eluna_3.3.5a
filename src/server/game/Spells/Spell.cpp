@@ -4727,6 +4727,19 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOT
 
 SpellCastResult Spell::CheckCast(bool strict)
 {
+        if(m_spellInfo->Id==53271) 
+
+    {
+        if(Player* player=m_caster->ToPlayer())
+        {
+            if(Pet* pet=player->GetPet())
+            {
+                if(!pet->IsAlive())
+                    return SPELL_FAILED_NO_PET;
+            }
+            else return SPELL_FAILED_NO_PET;
+        }
+    }
     // check death state
     if (!m_caster->IsAlive() && !(m_spellInfo->Attributes & SPELL_ATTR0_PASSIVE) && !((m_spellInfo->Attributes & SPELL_ATTR0_CASTABLE_WHILE_DEAD) || (IsTriggered() && !m_triggeredByAuraSpell)))
         return SPELL_FAILED_CASTER_DEAD;
