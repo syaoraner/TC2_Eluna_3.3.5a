@@ -1,0 +1,59 @@
+From a012fc88f66ee18b8bea0ddf0d1cef37b0afc476 Mon Sep 17 00:00:00 2001
+From: JunkyBulgaria <Emiliyan Kurtseliyanski@abv.bg>
+Date: Sun, 24 Nov 2013 00:13:10 +0000
+Subject: [PATCH] Core/Network:: Packet(opcode) Flood Protection (WowAddin)
+
+---
+ src/server/game/Handlers/CharacterHandler.cpp |  4 ++--
+ src/server/game/Server/WorldSession.cpp       | 16 +++++++++++++---
+ 2 files changed, 15 insertions(+), 5 deletions(-)
+
+diff --git a/src/server/game/Handlers/CharacterHandler.cpp b/src/server/game/Handlers/CharacterHandler.cpp
+index 25164b8..eb2df1b 100644
+--- a/src/server/game/Handlers/CharacterHandler.cpp
++++ b/src/server/game/Handlers/CharacterHandler.cpp
+@@ -766,8 +766,8 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
+ {
+     if (PlayerLoading() || GetPlayer() != NULL)
+     {
+-        TC_LOG_ERROR("network", "Player tryes to login again, AccountId = %d", GetAccountId());
+-        return;
++        TC_LOG_INFO("server.worldserver", "[Hack] Player Try To Enter again ingame after being in the same session = %d", GetAccountId());
+     }
+ 
+     m_playerLoading = true;
+diff --git a/src/server/game/Server/WorldSession.cpp b/src/server/game/Server/WorldSession.cpp
+index c30bd17..8f7c3d8 100644
+--- a/src/server/game/Server/WorldSession.cpp
++++ b/src/server/game/Server/WorldSession.cpp
+@@ -365,20 +367,28 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
+                         LogUnprocessedTail(packet);
+                         break;
+                     case STATUS_NEVER:
+-                        TC_LOG_ERROR("network.opcode", "Received not allowed opcode %s from %s", GetOpcodeNameForLogging(packet->GetOpcode()).c_str()
++                        TC_LOG_INFO("server.worldserver", "[STATUS_NEVER] Poluchen e greshen opcode (flood) ot %s za %s", GetOpcodeNameForLogging(packet->GetOpcode()).c_str()
+                             , GetPlayerInfo().c_str());
+                         break;
+                     case STATUS_UNHANDLED:
+-                        TC_LOG_DEBUG("network.opcode", "Received not handled opcode %s from %s", GetOpcodeNameForLogging(packet->GetOpcode()).c_str()
++                        TC_LOG_INFO("server.worldserver", "[STATUS_UNHANDLED] Poluchen e greshen opcode (flood) za %s ot %s", GetOpcodeNameForLogging(packet->GetOpcode()).c_str()
+                             , GetPlayerInfo().c_str());
+                         break;
++		            default:
++						TC_LOG_INFO("server.worldserver", "[default case] Poluchen e greshen opcode status  %u [opcode %s] ot %s", opHandle.status, GetOpcodeNameForLogging(opcode).c_str(), GetPlayerInfo().c_str());
++						break;
++
+                 }
+             }
+             catch (ByteBufferException const&)
+             {
+-                TC_LOG_ERROR("misc", "WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.",
++                TC_LOG_INFO("server.worldserver", "WorldSession::Update ByteBufferException [WowAddin.dll] Opit za hack.. (opcode: %u) ot potrebitel %s,account id=%i. Igracha e nakazan.",
+                         packet->GetOpcode(), GetRemoteAddress().c_str(), GetAccountId());
+                 packet->hexlike();
+             }
+         }
+ 
+-- 
+1.8.3.msysgit.0
+
